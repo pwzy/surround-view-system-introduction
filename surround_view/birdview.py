@@ -24,15 +24,20 @@ class ProjectedImageBuffer(object):
         self.wc = QWaitCondition()
         self.mutex = QMutex()
         self.arrived = 0
-        self.current_frames = dict()
+        self.current_frames = dict() # 表示当前每个相机的一张照片
 
     def bind_thread(self, thread):
         with QMutexLocker(self.mutex):
             self.sync_devices.add(thread.device_id)
 
+        # 建立当前的图片
         name = thread.camera_model.camera_name
         shape = settings.project_shapes[name]
+        # shape[::-1]表示维度逆向，然后后面增加一个维度，即通道为3  (100, 500) + (3,) = (100, 500, 3)
+        # 表示当前相机的一张图片 以字典来表示
         self.current_frames[thread.device_id] = np.zeros(shape[::-1] + (3,), np.uint8)
+
+        # 绑定到当前这个buffer_manager
         thread.proc_buffer_manager = self
 
     def get(self):
@@ -373,6 +378,7 @@ class BirdView(BaseThread):
 
             self.processing_mutex.lock()
 
+            # 从proc_buffer_manager中获取当当前的图片，然后进行拼接
             self.update_frames(self.proc_buffer_manager.get().values())
             self.make_luminance_balance().stitch_all_parts()
             self.make_white_balance()
