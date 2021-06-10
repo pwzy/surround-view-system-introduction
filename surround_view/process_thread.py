@@ -4,6 +4,8 @@ from PyQt5.QtCore import qDebug, QMutex
 from .base_thread import BaseThread
 
 
+#  CameraProcessingThread(capture_buffer_manager, camera_id, camera_model)
+
 class CameraProcessingThread(BaseThread):
 
     """
@@ -11,8 +13,10 @@ class CameraProcessingThread(BaseThread):
     """
 
     def __init__(self,
+                 # MultiBufferManager 的实例
                  capture_buffer_manager,
                  device_id,
+                 # FisheyeCameraModel 可以计算投影后的图片
                  camera_model,
                  drop_if_full=True,
                  parent=None):
@@ -23,11 +27,12 @@ class CameraProcessingThread(BaseThread):
         drop_if_full: drop if the buffer is full.
         """
         super(CameraProcessingThread, self).__init__(parent)
+        # 绑定MultiBufferManager的实例
         self.capture_buffer_manager = capture_buffer_manager
         self.device_id = device_id
+        # an instance of the `FisheyeCameraModel` object
         self.camera_model = camera_model
         self.drop_if_full = drop_if_full
-        # an instance of the `ProjectedImageBuffer` object
         self.proc_buffer_manager = None
 
     def run(self):

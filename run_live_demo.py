@@ -19,15 +19,18 @@ def main():
                    for camera_id, flip_method in zip(camera_ids, flip_methods)]
     capture_buffer_manager = MultiBufferManager()
     for td in capture_tds:
-        # 添加摄像头对buffer的映射关系
+        # 添加摄像头对buffer的映射关系,为每个摄像头绑定一个buffer
         capture_buffer_manager.bind_thread(td, buffer_size=8)
         if (td.connect_camera()):
+            # 开始每个camera的线程
             td.start()
 
+    # 创建 在bird_view 文件中
     proc_buffer_manager = ProjectedImageBuffer()
-    process_tds = [CameraProcessingThread(capture_buffer_manager,
-                                          camera_id,
-                                          camera_model)
+    process_tds = [CameraProcessingThread(capture_buffer_manager,  #   MultiBufferManager 的实例，进行buffer的管理
+                                          camera_id,   
+                                          camera_model #FisheyeCameraModel 的实例，提供矫正图的计算
+                                          )
                    for camera_id, camera_model in zip(camera_ids, camera_models)]
     for td in process_tds:
         proc_buffer_manager.bind_thread(td)
