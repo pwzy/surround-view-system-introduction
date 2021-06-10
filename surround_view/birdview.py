@@ -13,6 +13,7 @@ from . import utils
 class ProjectedImageBuffer(object):
 
     """
+    同步各个摄像头的处理程序
     Class for synchronizing processing threads from different cameras.
     """
 

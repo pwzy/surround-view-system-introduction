@@ -15,14 +15,16 @@ camera_models = [FisheyeCameraModel(camera_file, name) for camera_file, name in 
 
 
 def main():
+    # 创建摄像头线程列表
     capture_tds = [CaptureThread(camera_id, flip_method)
                    for camera_id, flip_method in zip(camera_ids, flip_methods)]
+    # 创建 MultiBufferManager 的buffer管理器,用于将摄像头线程绑定到图像的buffer、管理摄像头、并进行摄像头同步
     capture_buffer_manager = MultiBufferManager()
-    for td in capture_tds:
+    for td in capture_tds:  # 便利摄像头线程
         # 添加摄像头对buffer的映射关系,为每个摄像头绑定一个buffer
-        capture_buffer_manager.bind_thread(td, buffer_size=8)
-        if (td.connect_camera()):
-            # 开始每个camera的线程
+        capture_buffer_manager.bind_thread(td, buffer_size=8)   # 将每个摄像头线程绑定到buffer，并注册摄像头信息
+        if (td.connect_camera()): 
+            # 如果摄像头链接成功， 开始每个camera的线程
             td.start()
 
     # 创建 在bird_view 文件中
