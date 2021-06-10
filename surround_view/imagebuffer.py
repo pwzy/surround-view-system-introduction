@@ -10,7 +10,7 @@ from queue import Queue
 
 
 class Buffer(object):
-def __init__(self, buffer_size=5):
+    def __init__(self, buffer_size=5):
         self.buffer_size = buffer_size
         self.free_slots = QSemaphore(self.buffer_size)
         self.used_slots = QSemaphore(0)
@@ -128,7 +128,7 @@ class MultiBufferManager(object):
                 self.sync_devices.remove(device_id)
                 self.wc.wakeAll()
 
-    def sync(self, device_id)
+    def sync(self, device_id):
         # 在所有摄像头都调用一次sync后达到self.arrived == len(self.sync_devices)的条件，然后唤醒所有的摄像头进行下一步处理
         # 不清楚功能
         # 仅仅在制定的设备或者流使能时进行同步

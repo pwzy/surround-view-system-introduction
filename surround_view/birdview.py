@@ -152,6 +152,7 @@ class BirdView(BaseThread):
         return self.buffer.get()
 
     def update_frames(self, images):
+        #  self.frames 为一个列表，保存的是矫正后的前后左右的视图
         self.frames = images
 
     # 导入权重图和mask图
@@ -209,10 +210,17 @@ class BirdView(BaseThread):
 
     def stitch_all_parts(self):
         front, back, left, right = self.frames
+        #  def FM(front_image):
+        #      return front_image[:, xl:xr]
+        # 取车的logo前面的区域
         np.copyto(self.F, FM(front))
         np.copyto(self.B, BM(back))
         np.copyto(self.L, LM(left))
         np.copyto(self.R, RM(right))
+        # 生成四个角的图像
+        #     def merge(self, imA, imB, k):
+                #  G = self.weights[k]
+                #  return (imA * G + imB * (1 - G)).astype(np.uint8)
         np.copyto(self.FL, self.merge(FI(front), LI(left), 0))
         np.copyto(self.FR, self.merge(FII(front), RII(right), 1))
         np.copyto(self.BL, self.merge(BIII(back), LIII(left), 2))
@@ -229,8 +237,11 @@ class BirdView(BaseThread):
             else:
                 return x * np.exp((1 - x) * 0.8)
 
+        # 分别为前后左右的四张图片
         front, back, left, right = self.frames
+        # 分别为四角的mask
         m1, m2, m3, m4 = self.masks
+        # 每张图片分出三个通道
         Fb, Fg, Fr = cv2.split(front)
         Bb, Bg, Br = cv2.split(back)
         Lb, Lg, Lr = cv2.split(left)
@@ -255,7 +266,8 @@ class BirdView(BaseThread):
         t1 = (a1 * b1 * c1 * d1)**0.25
         t2 = (a2 * b2 * c2 * d2)**0.25
         t3 = (a3 * b3 * c3 * d3)**0.25
-
+    
+        #######################################################################
         x1 = t1 / (d1 / a1)**0.5
         x2 = t2 / (d2 / a2)**0.5
         x3 = t3 / (d3 / a3)**0.5
@@ -268,6 +280,7 @@ class BirdView(BaseThread):
         Fg = utils.adjust_luminance(Fg, x2)
         Fr = utils.adjust_luminance(Fr, x3)
 
+        #######################################################################
         y1 = t1 / (b1 / c1)**0.5
         y2 = t2 / (b2 / c2)**0.5
         y3 = t3 / (b3 / c3)**0.5
@@ -280,6 +293,7 @@ class BirdView(BaseThread):
         Bg = utils.adjust_luminance(Bg, y2)
         Br = utils.adjust_luminance(Br, y3)
 
+        #######################################################################
         z1 = t1 / (c1 / d1)**0.5
         z2 = t2 / (c2 / d2)**0.5
         z3 = t3 / (c3 / d3)**0.5
@@ -292,6 +306,7 @@ class BirdView(BaseThread):
         Lg = utils.adjust_luminance(Lg, z2)
         Lr = utils.adjust_luminance(Lr, z3)
 
+        #######################################################################
         w1 = t1 / (a1 / b1)**0.5
         w2 = t2 / (a2 / b2)**0.5
         w3 = t3 / (a3 / b3)**0.5
@@ -304,6 +319,7 @@ class BirdView(BaseThread):
         Rg = utils.adjust_luminance(Rg, w2)
         Rr = utils.adjust_luminance(Rr, w3)
 
+        #######################################################################
         self.frames = [cv2.merge((Fb, Fg, Fr)),
                        cv2.merge((Bb, Bg, Br)),
                        cv2.merge((Lb, Lg, Lr)),

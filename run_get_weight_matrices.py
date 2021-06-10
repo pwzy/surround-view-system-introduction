@@ -24,15 +24,21 @@ def main():
         projected.append(img)  # 将所有矫正好的图片放到投影列表里
 
     birdview = BirdView()
+    # Gmat 和 Mmat 分别为四角的权重值和mask
     Gmat, Mmat = birdview.get_weights_and_masks(projected)
+    # 更新图片
     birdview.update_frames(projected)
+    # 进行拉普拉斯平滑后进行拼接
     birdview.make_luminance_balance().stitch_all_parts()
+    #         self.image = utils.make_white_balance(self.image)
     birdview.make_white_balance()
     birdview.copy_car_image()
+    #  print(birdview.image)
     ret = display_image("BirdView Result", birdview.image)
-    if ret > 0:
-        Image.fromarray((Gmat * 255).astype(np.uint8)).save("weights.png")
-        Image.fromarray(Mmat.astype(np.uint8)).save("masks.png")
+    #  print(ret)
+    #  if ret > 0:
+    Image.fromarray((Gmat * 255).astype(np.uint8)).save("weights.png")
+    Image.fromarray(Mmat.astype(np.uint8)).save("masks.png")
 
 
 if __name__ == "__main__":
