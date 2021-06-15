@@ -1,0 +1,71 @@
+1. run_live_demo.py
+  -camera_ids = [4, 3, 5, 6]
+  -flip_methods = [0, 2, 0, 2]
+  +camera_ids = [0, 2, 4, 6]
+  +flip_methods = [0, 0, 0, 0]
+2. surround_view/birdview.py
+  @@ -216,11 +216,39 @@ class BirdView(BaseThread):
+                 return x * np.exp((1 - x) * 0.8)
+ 
+         front, back, left, right = self.frames
++        
++        if front.shape[0] > front.shape[1]:
++            front = front.transpose(1,0,2)
++        if back.shape[0] > back.shape[1]:
++            back= back.transpose(1,0,2)
++        if left.shape[1] > left.shape[0]:
++            left = left.transpose(1,0,2)
++        if right.shape[1] > right.shape[0]:
++            right = right.transpose(1,0,2)
++       
+         m1, m2, m3, m4 = self.masks
+         Fb, Fg, Fr = cv2.split(front)
+         Bb, Bg, Br = cv2.split(back)
+         Lb, Lg, Lr = cv2.split(left)
+         Rb, Rg, Rr = cv2.split(right)
++        ##################################################### 
++        #  print("#############################################")
++        #
++        #  #  def RII(right_image):
++        #  #      return right_image[:yt, :]
++        #  #
++        #  #  def FII(front_image):
++        #  #      return front_image[:, xr:]
++        #  print(yt)
++        #  print(xr)
++        #  print("front shape:" + str(front.shape))
++        #  print("back shape:" + str(back.shape))
++        #  print("left shape:" + str(left.shape))
++        #  print("right shape:" + str(right.shape))
++        #  print(RII(Rb).shape)
++        #  print(FII(Fb).shape)
++        #  print("#############################################")
++        ##################################################### 
+
+3. surround_view/capture_thread.py
+@@ -14,7 +14,7 @@ class CaptureThread(BaseThread):
+                  drop_if_full=True,
+                  api_preference=cv2.CAP_GSTREAMER,
+                  resolution=None,
+-                 use_gst=True,
++                 use_gst=False,
+                  parent=None):
+         """
+         device_id: device number of the camera.
+@@ -41,6 +41,7 @@ class CaptureThread(BaseThread):
+             raise ValueError("This thread has not been binded to any buffer manager yet")
+ 
+         while True:
++            print(" CaptureThread is normal !!")
+             self.stop_mutex.lock()
+             if self.stopped:
+                 self.stopped = False
+4. surround_view/process_thread.py
+@@ -35,6 +35,7 @@ class CameraProcessingThread(BaseThread):
+             raise ValueError("This thread has not been binded to any processing thread yet")
+ 
+         while True:
++            print(" CameraProcessingThread is normal!!")       
+             self.stop_mutex.lock()
+             if self.stopped:
+                 self.stopped = False
